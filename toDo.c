@@ -74,8 +74,10 @@ int main()
 
     if (tareasRealizadas[i] != NULL)
     {
-      printf("\nTarea: %s", tareasRealizadas[i]->Descripcion);
-      printf("\nDuracion: %i", tareasRealizadas[i]->Duracion);
+      printf("\n=============");
+      printf("\nId_Tarea: %d", tareasRealizadas[i]->TareaID);
+      printf("\nDescripcion: %s", tareasRealizadas[i]->Descripcion);
+      printf("\nDuracion: %i min", tareasRealizadas[i]->Duracion);
     }
   }
 
@@ -85,50 +87,128 @@ int main()
 
     if (tareasPendientes[i] != NULL)
     {
-      printf("\nTarea: %s", tareasPendientes[i]->Descripcion);
-      printf("\nDuracion: %i", tareasPendientes[i]->Duracion);
+      printf("\n=============");
+      printf("\nId_Tarea: %d", tareasPendientes[i]->TareaID);
+      printf("\nDescripcion: %s", tareasPendientes[i]->Descripcion);
+      printf("\nDuracion: %i min", tareasPendientes[i]->Duracion);
+    }
+  }
+  char respuesta;
+
+  while (1)
+  {
+    printf("\n¿Desea buscar una tarea por ID:? (S/N): ");
+    fflush(stdin);
+    scanf(" %c", &respuesta);
+
+    if (respuesta == 'S' || respuesta == 's')
+    {
+      int id_Tarea;
+      printf("Ingrese el Id de la tarea que desea buscar\n");
+      scanf("%d", &id_Tarea);
+      struct Tarea *tareaBuscadaPorId = BuscaTareaPorId(tareasPendientes, tareasRealizadas, id_Tarea, nTareas);
+      if (tareaBuscadaPorId != NULL)
+      {
+        printf("\n======Tarea Encontrada=======");
+        printf("\nId_Tarea: %d", tareaBuscadaPorId->TareaID);
+        printf("\nDescripcion: %s", tareaBuscadaPorId->Descripcion);
+        printf("\nDuracion: %i min", tareaBuscadaPorId->Duracion);
+      }
+      else
+      {
+        printf("\n======Tarea No Encontrada=======");
+      }
+
+      break;
+    }
+    else if (respuesta == 'N' || respuesta == 'n')
+    {
+      printf("Saliendo...\n");
+      break;
+    }
+    else
+    {
+      printf("Respuesta inválida. Por favor, responde con 'S' o 'N'.\n");
     }
   }
 
-  struct Tarea *tareaBuscadaPorId = BuscaTareaPorId(tareasPendientes, tareasRealizadas, 2, nTareas);
+  while (1)
+  {
+    printf("\n¿Desea buscar una tarea por palabra clave:? (S/N): ");
+    fflush(stdin);
+    scanf(" %c", &respuesta);
 
-  struct Tarea *tareaBuscadaPorPalabra = BuscaTareaPorPalabra(tareasPendientes, tareasRealizadas, "mundo", nTareas);
+    if (respuesta == 'S' || respuesta == 's')
+    {
+      char palabraClave[50];
+      printf("Ingrese la palabra clave:\n");
+      fflush(stdin);
+      gets(palabraClave);
+      struct Tarea *tareaBuscadaPorPalabra = BuscaTareaPorPalabra(tareasPendientes, tareasRealizadas, palabraClave, nTareas);
+      if (tareaBuscadaPorPalabra != NULL)
+      {
+        printf("\n======Tarea Encontrada=======");
+        printf("\nId_Tarea: %d", tareaBuscadaPorPalabra->TareaID);
+        printf("\nDescripcion: %s", tareaBuscadaPorPalabra->Descripcion);
+        printf("\nDuracion: %i min", tareaBuscadaPorPalabra->Duracion);
+      }
+      else
+      {
+        printf("\n======Tarea No Encontrada=======");
+      }
+
+      break;
+    }
+    else if (respuesta == 'N' || respuesta == 'n')
+    {
+      printf("Saliendo...\n");
+      break;
+    }
+    else
+    {
+      printf("Respuesta inválida. Por favor, responde con 'S' o 'N'.\n");
+    }
+  }
 
   return 0;
 }
 
 struct Tarea *BuscaTareaPorId(struct Tarea **T1, struct Tarea **T2, int idTarea, int numTareas)
 {
-
+  struct Tarea *TareaBuscada = NULL;
   for (int i = 0; i < numTareas; i++)
   {
     if (T1[i] != NULL)
     {
       if (T1[i]->TareaID == idTarea)
       {
-        return T1[i];
+        TareaBuscada = T1[i];
       }
-    } else if (T2[i]->TareaID == idTarea)
+    }
+    else if (T2[i]->TareaID == idTarea)
     {
-      return T2[i];
+      TareaBuscada = T2[i];
     }
   }
+  return TareaBuscada;
 }
 
 struct Tarea *BuscaTareaPorPalabra(struct Tarea **T1, struct Tarea **T2, char *palabraClave, int numTareas)
 {
-
+  struct Tarea *TareaBuscada = NULL;
   for (int i = 0; i < numTareas; i++)
   {
     if (T1[i] != NULL)
     {
       if (strstr(T1[i]->Descripcion, palabraClave))
       {
-        return T1[i];
+        TareaBuscada = T1[i];
       }
-    } else if (strstr(T2[i]->Descripcion, palabraClave))
+    }
+    else if (strstr(T2[i]->Descripcion, palabraClave))
     {
-      return T2[i];
+      TareaBuscada = T2[i];
     }
   }
+  return TareaBuscada;
 }
