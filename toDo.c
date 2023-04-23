@@ -11,9 +11,9 @@ struct Tarea
   int Duracion; // entre 10 – 100
 };
 
-struct Tarea *BuscarTarea(struct Tarea **T1, struct Tarea **T2, int idTarea, int numTareas);
+struct Tarea *BuscaTareaPorId(struct Tarea **T1, struct Tarea **T2, int idTarea, int numTareas);
 
-struct Tarea *BuscarTarea(struct Tarea **T1, struct Tarea **T2, char *palabraClave, int numTareas);
+struct Tarea *BuscaTareaPorPalabra(struct Tarea **T1, struct Tarea **T2, char *palabraClave, int numTareas);
 
 int main()
 {
@@ -90,14 +90,14 @@ int main()
     }
   }
 
-  struct Tarea *tareaBuscada = BuscarTarea(tareasPendientes, tareasRealizadas, 2, nTareas);
+  struct Tarea *tareaBuscadaPorId = BuscaTareaPorId(tareasPendientes, tareasRealizadas, 2, nTareas);
 
-  struct Tarea *TareaBuscada = BuscarTarea(tareasPendientes, tareasRealizadas, "mundo", nTareas);
+  struct Tarea *tareaBuscadaPorPalabra = BuscaTareaPorPalabra(tareasPendientes, tareasRealizadas, "mundo", nTareas);
 
   return 0;
 }
 
-struct Tarea *BuscarTarea(struct Tarea **T1, struct Tarea **T2, int idTarea, int numTareas)
+struct Tarea *BuscaTareaPorId(struct Tarea **T1, struct Tarea **T2, int idTarea, int numTareas)
 {
 
   for (int i = 0; i < numTareas; i++)
@@ -115,7 +115,7 @@ struct Tarea *BuscarTarea(struct Tarea **T1, struct Tarea **T2, int idTarea, int
   }
 }
 
-struct Tarea *BuscarTarea(struct Tarea **T1, struct Tarea **T2, char *palabraClave, int numTareas)
+struct Tarea *BuscaTareaPorPalabra(struct Tarea **T1, struct Tarea **T2, char *palabraClave, int numTareas)
 {
 
   for (int i = 0; i < numTareas; i++)
