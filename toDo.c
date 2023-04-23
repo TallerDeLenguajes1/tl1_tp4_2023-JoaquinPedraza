@@ -11,6 +11,8 @@ struct Tarea
   int Duracion; // entre 10 – 100
 };
 
+struct Tarea *BuscarTarea(struct Tarea **T1, struct Tarea **T2, int idTarea, int numTareas);
+
 int main()
 {
 
@@ -85,5 +87,25 @@ int main()
       printf("\nDuracion: %i", tareasPendientes[i]->Duracion);
     }
   }
+
+  struct Tarea *tareaBuscada = BuscarTarea(tareasPendientes, tareasRealizadas, 2, nTareas);
   return 0;
+}
+
+struct Tarea *BuscarTarea(struct Tarea **T1, struct Tarea **T2, int idTarea, int numTareas)
+{
+
+  for (int i = 0; i < numTareas; i++)
+  {
+    if (T1[i] != NULL)
+    {
+      if (T1[i]->TareaID == idTarea)
+      {
+        return T1[i];
+      }
+    } else if (T2[i]->TareaID == idTarea)
+    {
+      return T2[i];
+    }
+  }
 }
