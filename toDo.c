@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 // cSpell:disable
 
@@ -11,204 +12,226 @@ struct Tarea
   int Duracion; // entre 10 – 100
 };
 
-struct Tarea *BuscaTareaPorId(struct Tarea **T1, struct Tarea **T2, int idTarea, int numTareas);
+struct Nodo
+{
+  struct Tarea T;
+  struct Nodo *Siguiente;
+};
 
-struct Tarea *BuscaTareaPorPalabra(struct Tarea **T1, struct Tarea **T2, char *palabraClave, int numTareas);
+typedef struct Nodo *Lista;
+
+Lista crearLista();
+bool esListaVacia(Lista L);
+struct Nodo *crearNuevaTarea();
+void insertarAlFinal(Lista T, Lista *L);
+void quitarNodo(Lista Nodo, Lista *L);
+void mostrarLista(Lista L);
+struct Nodo *buscarTareaPorId(Lista L, int idTarea);
+struct Nodo *buscarTareaPorPalabra(Lista L, char *clave);
 
 int main()
 {
 
+  // Se solicita conocer la cantidad de tareas
   int nTareas;
   printf("De cuantas tareas desea hacerse cargo: ");
   scanf("%d", &nTareas);
 
-  struct Tarea **tareasPendientes;
-
-  tareasPendientes = (struct Tarea **)malloc(sizeof(struct Tarea *) * nTareas);
-
-  for (int i = 0; i < nTareas; i++)
-  {
-    tareasPendientes[i] = NULL;
-  }
+  // Cargo las tareas incialmente todas comienzan en el estado de tareas pendientes.
+  Lista tareasPendientes = crearLista();
 
   for (int i = 0; i < nTareas; i++)
   {
-    tareasPendientes[i] = (struct Tarea *)malloc(sizeof(struct Tarea));
-    tareasPendientes[i]->TareaID = i + 1;
-    char *buffer;
-    buffer = (char *)malloc(sizeof(char) * 255);
-    printf("Ingresar la descripcion: ");
-    fflush(stdin);
-    gets(buffer);
-    fflush(stdin);
-    tareasPendientes[i]->Descripcion = (char *)malloc(sizeof(char) * (strlen(buffer) + 1));
-    strcpy(tareasPendientes[i]->Descripcion, buffer);
-    free(buffer);
-    tareasPendientes[i]->Duracion = 10 + rand() % 100;
-  }
-  struct Tarea **tareasRealizadas;
-
-  tareasRealizadas = (struct Tarea **)malloc(sizeof(struct Tarea *) * nTareas);
-
-  for (int i = 0; i < nTareas; i++)
-  {
-    tareasRealizadas[i] = NULL;
+    insertarAlFinal(crearNuevaTarea(i), &tareasPendientes);
   }
 
-  for (int i = 0; i < nTareas; i++)
-  {
-    char fueRealizada;
-    printf("La tarea %s fue realizada?, (S/N)", tareasPendientes[i]->Descripcion);
-    fflush(stdin);
-    scanf("%c", &fueRealizada);
-    if (fueRealizada == 'S' || fueRealizada == 's')
-    {
-      tareasRealizadas[i] = tareasPendientes[i];
-      tareasPendientes[i] = NULL;
-    }
-  }
+  Lista tareasRealizadas = crearLista();
 
-  printf("\n<-----------Tareas Realizadas con exito---------------->");
-  for (int i = 0; i < nTareas; i++)
-  {
-
-    if (tareasRealizadas[i] != NULL)
-    {
-      printf("\n=============");
-      printf("\nId_Tarea: %d", tareasRealizadas[i]->TareaID);
-      printf("\nDescripcion: %s", tareasRealizadas[i]->Descripcion);
-      printf("\nDuracion: %i min", tareasRealizadas[i]->Duracion);
-    }
-  }
-
-  printf("\n<-----------Tareas pendientes---------------->");
-  for (int i = 0; i < nTareas; i++)
-  {
-
-    if (tareasPendientes[i] != NULL)
-    {
-      printf("\n=============");
-      printf("\nId_Tarea: %d", tareasPendientes[i]->TareaID);
-      printf("\nDescripcion: %s", tareasPendientes[i]->Descripcion);
-      printf("\nDuracion: %i min", tareasPendientes[i]->Duracion);
-    }
-  }
   char respuesta;
-
-  while (1)
+  if (!esListaVacia(tareasPendientes)) // SI NO ESTA VACIA LAS TAREAS PENDIENTES
   {
-    printf("\n¿Desea buscar una tarea por ID:? (S/N): ");
-    fflush(stdin);
-    scanf(" %c", &respuesta);
-
-    if (respuesta == 'S' || respuesta == 's')
+    if ((tareasPendientes->Siguiente))
     {
-      int id_Tarea;
-      printf("Ingrese el Id de la tarea que desea buscar\n");
-      scanf("%d", &id_Tarea);
-      struct Tarea *tareaBuscadaPorId = BuscaTareaPorId(tareasPendientes, tareasRealizadas, id_Tarea, nTareas);
-      if (tareaBuscadaPorId != NULL)
+      Lista recorrido = tareasPendientes;
+
+      while (recorrido->Siguiente)
       {
-        printf("\n======Tarea Encontrada=======");
-        printf("\nId_Tarea: %d", tareaBuscadaPorId->TareaID);
-        printf("\nDescripcion: %s", tareaBuscadaPorId->Descripcion);
-        printf("\nDuracion: %i min", tareaBuscadaPorId->Duracion);
+        printf("La tarea %s fue realizada? (S/N)", recorrido->T.Descripcion);
+        fflush(stdin);
+        scanf("%c", &respuesta);
+
+        if (respuesta == 'S')
+        {
+          quitarNodo(recorrido, &tareasPendientes);
+          Lista Aux = recorrido;
+          recorrido = recorrido->Siguiente;
+          Aux->Siguiente = NULL;
+          insertarAlFinal(Aux, &tareasRealizadas);
+        }
+        else
+        {
+          recorrido = recorrido->Siguiente;
+        }
       }
-      else
-      {
-        printf("\n======Tarea No Encontrada=======");
-      }
 
-      break;
-    }
-    else if (respuesta == 'N' || respuesta == 'n')
-    {
-      printf("Saliendo...\n");
-      break;
-    }
-    else
-    {
-      printf("Respuesta inválida. Por favor, responde con 'S' o 'N'.\n");
-    }
-  }
-
-  while (1)
-  {
-    printf("\n¿Desea buscar una tarea por palabra clave:? (S/N): ");
-    fflush(stdin);
-    scanf(" %c", &respuesta);
-
-    if (respuesta == 'S' || respuesta == 's')
-    {
-      char palabraClave[50];
-      printf("Ingrese la palabra clave:\n");
+      printf("La tarea %s fue realizada? (S/N)", recorrido->T.Descripcion);
       fflush(stdin);
-      gets(palabraClave);
-      struct Tarea *tareaBuscadaPorPalabra = BuscaTareaPorPalabra(tareasPendientes, tareasRealizadas, palabraClave, nTareas);
-      if (tareaBuscadaPorPalabra != NULL)
-      {
-        printf("\n======Tarea Encontrada=======");
-        printf("\nId_Tarea: %d", tareaBuscadaPorPalabra->TareaID);
-        printf("\nDescripcion: %s", tareaBuscadaPorPalabra->Descripcion);
-        printf("\nDuracion: %i min", tareaBuscadaPorPalabra->Duracion);
-      }
-      else
-      {
-        printf("\n======Tarea No Encontrada=======");
-      }
+      scanf("%c", &respuesta);
 
-      break;
-    }
-    else if (respuesta == 'N' || respuesta == 'n')
-    {
-      printf("Saliendo...\n");
-      break;
+      if (respuesta == 'S')
+      {
+        quitarNodo(recorrido, &tareasPendientes);
+        Lista Aux = recorrido;
+        recorrido = recorrido->Siguiente;
+        Aux->Siguiente = NULL;
+        insertarAlFinal(Aux, &tareasRealizadas);
+      }
     }
     else
     {
-      printf("Respuesta inválida. Por favor, responde con 'S' o 'N'.\n");
+      printf("La tarea %s fue realizada? (S/N)", tareasPendientes->T.Descripcion);
+      fflush(stdin);
+      scanf("%c", &respuesta);
+
+      if (respuesta == 'S')
+      {
+        insertarAlFinal(tareasPendientes, &tareasRealizadas);
+        tareasPendientes = tareasPendientes->Siguiente;
+      }
     }
   }
+  printf("\n\n#####Tareas Pendientes#####");
+  mostrarLista(tareasPendientes);
+  printf("\n\n#####Tareas Realizadas#####");
+  mostrarLista(tareasRealizadas);
 
+  struct Nodo *tareaBuscadaPorId = buscarTareaPorId(tareasPendientes, 2);
+  struct Nodo *tareaBuscadaPorPalabra = buscarTareaPorPalabra(tareasRealizadas, "mundo");
   return 0;
 }
 
-struct Tarea *BuscaTareaPorId(struct Tarea **T1, struct Tarea **T2, int idTarea, int numTareas)
+Lista crearLista()
 {
-  struct Tarea *TareaBuscada = NULL;
-  for (int i = 0; i < numTareas; i++)
+  return NULL;
+}
+struct Nodo *crearNuevaTarea(int sucesorID)
+{
+
+  struct Nodo *nuevaTarea;
+  nuevaTarea = (struct Nodo *)malloc(sizeof(struct Nodo));
+  nuevaTarea->T.TareaID = sucesorID + 1;
+
+  char *buffer;
+  buffer = (char *)malloc(sizeof(char) * 255);
+  printf("Ingresar la descripcion: ");
+  fflush(stdin);
+  gets(buffer);
+  nuevaTarea->T.Descripcion = (char *)malloc(sizeof(char) * (strlen(buffer) + 1));
+  strcpy(nuevaTarea->T.Descripcion, buffer);
+  free(buffer);
+
+  nuevaTarea->T.Duracion = 10 + rand() % 100;
+
+  return nuevaTarea;
+}
+void insertarAlFinal(Lista nuevoNodo, Lista *L)
+{
+  if (!esListaVacia(*L))
   {
-    if (T1[i] != NULL)
+    Lista Aux = *L;
+    while (Aux->Siguiente)
     {
-      if (T1[i]->TareaID == idTarea)
-      {
-        TareaBuscada = T1[i];
-      }
+      Aux = Aux->Siguiente;
     }
-    else if (T2[i]->TareaID == idTarea)
-    {
-      TareaBuscada = T2[i];
-    }
+    nuevoNodo->Siguiente = Aux->Siguiente;
+    Aux->Siguiente = nuevoNodo;
   }
-  return TareaBuscada;
+  else
+  {
+    nuevoNodo->Siguiente = *L;
+    *L = nuevoNodo;
+  }
+}
+void quitarNodo(Lista Nodo, Lista *L)
+{
+  if (Nodo != *L)
+  {
+    Lista aux = *L;
+    Lista AuxAnterior = *L;
+
+    while (aux != Nodo)
+    {
+      AuxAnterior = aux;
+      aux = aux->Siguiente;
+    }
+    AuxAnterior->Siguiente = aux->Siguiente;
+  }
+  else
+  {
+    *L = Nodo->Siguiente;
+  }
+}
+bool esListaVacia(Lista L)
+{
+  return (L == NULL);
+}
+void mostrarLista(Lista L)
+{
+  int item = 0;
+  if (!esListaVacia(L))
+  {
+    item++;
+    while (L->Siguiente)
+    {
+      printf("\n\n========Item %d de la lista========", item);
+      printf("\nID_Tarea: %d", L->T.TareaID);
+      printf("\nDescripcion: %s", L->T.Descripcion);
+      printf("\nTiempo de realizacion: %d min", L->T.Duracion);
+
+      L = L->Siguiente;
+      item++;
+    }
+    printf("\n\n========Item %d de la lista========", item);
+    printf("\nID_Tarea: %d", L->T.TareaID);
+    printf("\nDescripcion: %s", L->T.Descripcion);
+    printf("\nTiempo de realizacion: %d min", L->T.Duracion);
+  }
+  else
+  {
+    printf("\n\nSin datos para mostrar");
+  }
 }
 
-struct Tarea *BuscaTareaPorPalabra(struct Tarea **T1, struct Tarea **T2, char *palabraClave, int numTareas)
+struct Nodo *buscarTareaPorId(Lista L, int idTarea)
 {
-  struct Tarea *TareaBuscada = NULL;
-  for (int i = 0; i < numTareas; i++)
+
+  if (!esListaVacia(L))
   {
-    if (T1[i] != NULL)
+    while (L && L->T.TareaID != idTarea)
     {
-      if (strstr(T1[i]->Descripcion, palabraClave))
-      {
-        TareaBuscada = T1[i];
-      }
+      L = L->Siguiente;
     }
-    else if (strstr(T2[i]->Descripcion, palabraClave))
-    {
-      TareaBuscada = T2[i];
-    }
+    return L;
   }
-  return TareaBuscada;
+  else
+  {
+    return NULL;
+  }
+}
+
+struct Nodo *buscarTareaPorPalabra(Lista L, char *clave)
+{
+
+  if (!esListaVacia(L))
+  {
+    while (L && strstr(L->T.Descripcion, clave) == clave)
+    {
+      L = L->Siguiente;
+    }
+    return L;
+  }
+  else
+  {
+    return NULL;
+  }
 }
